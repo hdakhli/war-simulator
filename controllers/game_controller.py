@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from model.game import Game
 from services.game_service import GameService
@@ -10,16 +11,50 @@ app = FastAPI()
 game_service = GameService()
 
 
+class CreateGameData(BaseModel):
+    player_name: str
+    min_x: int
+    max_x: int
+    min_y: int
+    max_y: int
+    min_z: int
+    max_z: int
+
+
+class JoinGameData(BaseModel):
+    game_id: int
+    player_name: str
+
+
+class AddVesselData(BaseModel):
+    game_id: int
+    player_name: str
+    vessel_type: str
+    x: int
+    y: int
+    z: int
+
+
+class ShootAtData(BaseModel):
+    game_id: int
+    shooter_name: str
+    vessel_id: int
+    x: int
+    y: int
+    z: int
+
+
 @app.post("/create-game")
-async def create_game(player_name: str, min_x: int, max_x: int, min_y: int,
-                      max_y: int, min_z: int, max_z: int):
-    return game_service.create_game(player_name, min_x, max_x, min_y, max_y,
-                                    min_z, max_z)
+async def create_game(game_data: CreateGameData):
+    return game_service.create_game(game_data.player_name, game_data.min_x,
+                                    game_data.max_x, game_data.min_y,
+                                    game_data.max_y, game_data.min_z,
+                                    game_data.max_z)
 
 
 @app.post("/join-game")
-async def join_game(game_id: int, player_name: str) -> bool:
-    return game_service.join_game(game_id, player_name)
+async def join_game(game_data: JoinGameData) -> bool:
+    return game_service.join_game(game_data.game_id, game_data.player_name)
 
 
 @app.get("/get-game")
@@ -28,15 +63,17 @@ async def get_game(game_id: int) -> Game:
 
 
 @app.post("/add-vessel")
-async def add_vessel(game_id: int, player_name: str, vessel_type: str, x: int,
-                     y: int, z: int) -> bool:
-    return game_service.add_vessel(game_id, player_name, vessel_type, x, y, z)
+async def add_vessel(game_data: AddVesselData) -> bool:
+    return game_service.add_vessel(game_data.game_id, game_data.player_name,
+                                   game_data.vessel_type, game_data.x,
+                                   game_data.y, game_data.z)
 
 
 @app.post("/shoot-at")
-async def shoot_at(game_id: int, shooter_name: str, vessel_id: int, x: int,
-                   y: int, z: int) -> bool:
-    return game_service.shoot_at(game_id, shooter_name, vessel_id, x, y, z)
+async def shoot_at(game_data: ShootAtData) -> bool:
+    return game_service.shoot_at(game_data.game_id, game_data.shooter_name,
+                                 game_data.vessel_id, game_data.x, game_data.y,
+                                 game_data.z)
 
 
 @app.exception_handler(Exception)

@@ -82,11 +82,10 @@ class GameService:
         shooter_vessel = shooter.get_battlefield().get_vessel_by_id(vessel_id)
         shooter_vessel.fire_at(x, y, z)
         fired = targeted.get_battlefield().fired_at(x, y, z)
-        shooter_updated = False
         targeted_updated = False
+        shooter_updated = self.game_dao \
+            .create_or_update_vessel(shooter, shooter_vessel)
         if fired:
-            shooter_updated = self.game_dao \
-                .create_or_update_vessel(shooter, shooter_vessel)
             targeted_vessel = targeted.get_battlefield() \
                 .get_vessel_by_coordinates(x, y, z)
             targeted_updated = self.game_dao \
