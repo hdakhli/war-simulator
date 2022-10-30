@@ -55,7 +55,7 @@ class TestBattleField(TestCase):
 
         # Assert
         self.assertEqual(
-            "La puissance dépasse la maximum autorisé 2 !",
+            "La puissance dépasse le maximum autorisé 2 !",
             str(error_context.exception))
 
     def test_fired_at_fail(self):

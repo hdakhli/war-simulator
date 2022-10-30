@@ -27,7 +27,7 @@ class Battlefield:
         if self.get_vessel_by_coordinates(x, y, z) is not None:
             raise ValueError("Il y a déjà un vaisseau positionné ici !")
         if self.get_power() + vessel.get_hits() > self.max_power:
-            raise ValueError(f"La puissance dépasse la maximum autorisé "
+            raise ValueError(f"La puissance dépasse le maximum autorisé "
                              f"{self.max_power} !")
 
         self.vessels.append(vessel)
