@@ -1,12 +1,19 @@
+from pathlib import Path
+from typing import Optional
+
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.staticfiles import StaticFiles
 
 from model.game import Game
+from model.player import Player
 from services.game_service import GameService
 
 app = FastAPI()
+BASE_PATH = Path(__file__).resolve().parent.parent
+app.mount("/views", StaticFiles(directory=BASE_PATH / 'views'), name="views")
 
 game_service = GameService()
 
@@ -74,6 +81,11 @@ async def shoot_at(game_data: ShootAtData) -> bool:
     return game_service.shoot_at(game_data.game_id, game_data.shooter_name,
                                  game_data.vessel_id, game_data.x, game_data.y,
                                  game_data.z)
+
+
+@app.get("/get-player")
+async def get_player(game_id: int, player_name: str) -> Optional[Player]:
+    return game_service.get_player(game_id, player_name)
 
 
 @app.get("/game-status")

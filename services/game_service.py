@@ -118,6 +118,11 @@ class GameService:
                 .create_or_update_vessel(targeted, targeted_vessel)
         return shooter_updated and targeted_updated
 
+    def get_player(self, game_id: int, player_name: str) -> Optional[Player]:
+        game = self.game_dao.find_game(game_id)
+        shooter, targeted = get_players(game, player_name)
+        return shooter
+
     def get_game_status(self, game_id: int, shooter_name: str) -> str:
         game = self.game_dao.find_game(game_id)
         if game is None:
