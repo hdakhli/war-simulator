@@ -12,6 +12,12 @@ from model.submarine import Submarine
 from model.vessel import Vessel
 
 
+class GameStatus:
+    GAGNE = "GAGNE"
+    PERDU = "PERDU"
+    ENCOURS = "ENCOURS"
+
+
 def get_players(game, player_name) \
         -> tuple[Optional[Player], Optional[Player]]:
     shooter: Optional[Player] = None
@@ -36,6 +42,20 @@ def create_vessel(vessel_type: str, x: int, y: int, z: int) -> Vessel:
         case VesselTypes.DESTROYER:
             vessel = Destroyer(x, y, z)
     return vessel
+
+
+def get_player_status(player: Player) -> str:
+    vessels = player.battle_field.get_vessels()
+    hits = 0
+    ammunitions = 0
+    for vessel in vessels:
+        hits += vessel.get_hits()
+        ammunitions += vessel.get_weapon().get_ammunitions()
+
+    if hits == 0 or ammunitions == 0:
+        return GameStatus.PERDU
+
+    return GameStatus.ENCOURS
 
 
 class GameService:
@@ -69,6 +89,8 @@ class GameService:
         if game is None:
             raise GameNotFoundError("Cette partie n'existe pas !")
         shooter, targeted = get_players(game, player_name)
+        if shooter is None:
+            raise ValueError("Le joueur n'existe pas!")
         vessel = create_vessel(vessel_type, x, y, z)
         shooter.battle_field.add_vessel(vessel)
         return self.game_dao.create_or_update_vessel(shooter, vessel)
@@ -79,6 +101,10 @@ class GameService:
         if game is None:
             raise GameNotFoundError("Cette partie n'existe pas !")
         shooter, targeted = get_players(game, shooter_name)
+        if targeted is None:
+            raise ValueError(
+                "Il n'y a qu'un seul joueur!\n "
+                "Invitez un second joueur en lui envoyant l'id de partie!")
         shooter_vessel = shooter.get_battlefield().get_vessel_by_id(vessel_id)
         shooter_vessel.fire_at(x, y, z)
         fired = targeted.get_battlefield().fired_at(x, y, z)
@@ -91,3 +117,16 @@ class GameService:
             targeted_updated = self.game_dao \
                 .create_or_update_vessel(targeted, targeted_vessel)
         return shooter_updated and targeted_updated
+
+    def get_game_status(self, game_id: int, shooter_name: str) -> str:
+        game = self.game_dao.find_game(game_id)
+        if game is None:
+            raise GameNotFoundError("Cette partie n'existe pas !")
+        shooter, targeted = get_players(game, shooter_name)
+        targeted_status = get_player_status(targeted)
+        shooter_status = get_player_status(shooter)
+        if targeted_status == GameStatus.PERDU:
+            return GameStatus.GAGNE
+        if shooter_status == GameStatus.PERDU:
+            return GameStatus.PERDU
+        return GameStatus.ENCOURS

@@ -76,6 +76,11 @@ async def shoot_at(game_data: ShootAtData) -> bool:
                                  game_data.z)
 
 
+@app.get("/game-status")
+async def get_game_status(game_id: int, player_name: str) -> str:
+    return game_service.get_game_status(game_id, player_name)
+
+
 @app.exception_handler(Exception)
 async def exception_handler(request: Request, exc: Exception):
     return JSONResponse(
