@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from battlefield import Battlefield
-from cruiser import Cruiser
-from exceptions import OutOfRangeError
-from frigate import Frigate
+from model.battlefield import Battlefield
+from model.cruiser import Cruiser
+from model.exceptions import OutOfRangeError
+from model.frigate import Frigate
 
 
 class TestBattleField(TestCase):
